@@ -1,0 +1,67 @@
+name: Publish SAM Template
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8" # required for SAM CLI
+
+      - uses: aws-actions/setup-sam@v1
+
+      - run: sam build --use-container # use Docker container with Lambda's specific runtime
+  
+      - uses: actions/upload-artifact@master
+        with:
+          name: sam
+          path: .aws-sam
+
+  config:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.json }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      
+      - id: matrix
+        run: |
+          JSON=$(echo $(cat .github/workflows/config.json) | sed 's/ //g' )
+          echo "::set-output name=json::$JSON"
+
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: 
+        config: ${{fromJson(needs.config.outputs.matrix)}}
+    needs: [build, config]
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8" # required for SAM CLI
+
+      - uses: aws-actions/setup-sam@v1
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ matrix.config.region }}
+
+      - uses: actions/download-artifact@master
+        with:
+          name: sam
+          path: .aws-sam
+
+      - run: sam package --s3-bucket ${{ matrix.config.s3bucket }} --s3-prefix ${{ github.event.repository.name }} --output-template-file output-template.yml
+      - run: aws s3 cp output-template.yml s3://${{ matrix.config.s3bucket }}/${{ github.event.repository.name }}/template.yml

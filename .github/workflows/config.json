@@ -1,0 +1,18 @@
+[
+  {
+    "region": "eu-west-1",
+    "s3bucket": "bitbull-serverless-templates-butoamoogh8eigo"
+  },
+  {
+    "region": "eu-central-1",
+    "s3bucket": "bitbull-serverless-templates-saijuozaeshae6e"
+  },
+  {
+    "region": "us-east-1",
+    "s3bucket": "bitbull-serverless-templates-chai7ephae5eet2"
+  },
+  {
+    "region": "us-east-2",
+    "s3bucket": "bitbull-serverless-templates-xae9och1eipiem8"
+  }
+]

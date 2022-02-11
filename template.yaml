@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: Allow temporary whitelist to Security group for a specific IP
+
+Parameters:
+  StageName:
+    Type: String
+    Description: The API stage name.
+    Default: dev
+  Token:
+    Type: String
+    MinLength : 32
+    AllowedPattern : '[a-zA-Z0-9\-]+'
+    NoEcho: true
+    Description: The token used to authenticate the request.
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: The Security group to allow ingress to
+  IngressPort:
+    Type: String
+    Description: The Security group port to allow to connect to. You can specify a single port number or a range (for example, 7000-8000).
+    Default: '22'
+  IngressProtocol:
+    Type: String
+    Description: The Security group protocol to allow to connect to.
+    Default: TCP
+    AllowedValues: ['TCP', 'UDP', 'ICMP']
+  RuleDescription:
+    Type: String
+    MaxLength: 255
+    Description: The Security group ingress rule description that identify them.
+    Default: Managed by Dynamic IP Whitelist
+  FlushScheduleExpression:
+    Type: String
+    Description: The schedule expression to describe when flush ingresses.
+    Default: 'cron(0 0 * * ? *)'
+
+Globals:
+  Function:
+    Timeout: 6
+    Runtime: nodejs14.x
+    CodeUri: ./src
+    Tags:
+      ServiceName: Dynamic IP Whitelist
+      ServiceScope: Infrastructure
+
+Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref StageName
+
+  TokenParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !Ref Token
+  
+  AllowIpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: allow-ip.handler
+      Environment:
+        Variables:
+          TOKEN_PARAMETER: !Ref TokenParameter
+          SECURITY_GROUP_ID: !Ref SecurityGroupId
+          INGRESS_PORT: !Ref IngressPort
+          INGRESS_PROTOCOL: !Ref IngressProtocol
+          RULE_DESCRIPTION: !Ref RuleDescription
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: !Ref TokenParameter
+        - Statement:
+          - Sid: AllowIP
+            Effect: Allow
+            Action:
+              - ec2:AuthorizeSecurityGroupIngress
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/${SecurityGroupId}"
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: ApiGatewayApi
+            Method: GET
+            Path: /{token}
+
+  FlushRulesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: flush-rules.handler
+      Environment:
+        Variables:
+          SECURITY_GROUP_ID: !Ref SecurityGroupId
+          INGRESS_PORT: !Ref IngressPort
+          INGRESS_PROTOCOL: !Ref IngressProtocol
+          RULE_DESCRIPTION: !Ref RuleDescription
+      Policies:
+        - Statement:
+          - Sid: GetInstancesTags
+            Effect: Allow
+            Action:
+              - ec2:DescribeSecurityGroups
+              - ec2:RevokeSecurityGroupIngress
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/${SecurityGroupId}"
+      Events:
+        FlushIngressScheduledEvent:
+          Type: Schedule
+          Properties:
+            Schedule: !Ref FlushScheduleExpression
+
+Outputs:
+  TokenParameterId:
+    Description: "SSM parameter where Token is stored"
+    Value: !Ref TokenParameter
+
+  Endpoint:
+    Description: "Dynamic whitelist endpoint"
+    Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${StageName}/<place here the provided token>/"
