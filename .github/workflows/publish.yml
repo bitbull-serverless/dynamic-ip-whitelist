@@ -89,7 +89,7 @@ jobs:
       - run: aws s3 cp output-template.yml s3://${{ matrix.config.s3bucket }}/${{ github.event.repository.name }}/template.yml
       
       # deploy version
-      - run: sam package --s3-bucket ${{ matrix.config.s3bucket }} --s3-prefix ${{ github.event.repository.name }}/${{ needs.build.outputs.version }}/ --output-template-file output-template.yml
+      - run: sam package --s3-bucket ${{ matrix.config.s3bucket }} --s3-prefix ${{ github.event.repository.name }}/${{ needs.build.outputs.version }} --output-template-file output-template.yml
       - run: aws s3 cp output-template.yml s3://${{ matrix.config.s3bucket }}/${{ github.event.repository.name }}/${{ needs.build.outputs.version }}/template.yml
 
       - uses: actions/upload-release-asset@v1
