@@ -98,10 +98,12 @@ Resources:
           RULE_DESCRIPTION: !Ref RuleDescription
       Policies:
         - Statement:
-          - Sid: GetInstancesTags
-            Effect: Allow
+          - Effect: Allow
             Action:
               - ec2:DescribeSecurityGroups
+            Resource: "*"
+          - Effect: Allow
+            Action:
               - ec2:RevokeSecurityGroupIngress
             Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/${SecurityGroupId}"
       Events:
