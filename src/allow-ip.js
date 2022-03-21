@@ -2,7 +2,9 @@ const SecurityGroup = require('./lib/securityGroup')
 const Parameter = require('./lib/parameter')
 
 /**
- * Send Slack notification
+ * Lambda handler
+ * 
+ * @param {object} event
  */
 exports.handler = async (event) => {
 	console.log('event', JSON.stringify(event))
