@@ -60,6 +60,7 @@ Resources:
   AllowIpFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub "${AWS::StackName}-allow"
       Handler: allow-ip.handler
       Environment:
         Variables:
@@ -89,6 +90,7 @@ Resources:
   FlushRulesFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub "${AWS::StackName}-flush"
       Handler: flush-rules.handler
       Environment:
         Variables:
