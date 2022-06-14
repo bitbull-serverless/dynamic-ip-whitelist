@@ -67,8 +67,6 @@ This application need some required parameters when you deploy it:
 
 Optional parameters:
 
-- **StageName**: The name that identify the API stage.
-
 - **IngressPort**: Ingress port to allow. Can be also a range, for example "7000-8000".
 
 - **IngressProtocol**: Ingress protocol to allow. Can be TCP, UDP or ICMP.
