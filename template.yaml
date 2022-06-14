@@ -56,8 +56,8 @@ Resources:
     Properties:
       StageName: api
       Domain:
-        DomainName: !Ref ApiDomainName
-        CertificateArn: !Ref ApiCertificateArn
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref AcmCertificateArn
         EndpointConfiguration: REGIONAL
         Route53:
           HostedZoneId: !Ref HostedZoneId
