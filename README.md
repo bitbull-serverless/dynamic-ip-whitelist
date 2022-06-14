@@ -61,6 +61,10 @@ This application need some required parameters when you deploy it:
 
 - **SecurityGroupId**: The Security Group where add rules to.
 
+- **DomainName**: The domain name of website.
+
+- **AcmCertificateArn**: The certificate arn for the domain name provided
+
 Optional parameters:
 
 - **StageName**: The name that identify the API stage.
@@ -72,6 +76,8 @@ Optional parameters:
 - **RuleDescription**: The rules descriptions used to identify rules.
 
 - **FlushScheduleExpression**: The CloudWatch Event scheduled expression to trigger flush rules process.
+
+- **HostedZoneId**: The Route53 hosted zone ID used for the domain.
 
 ## Outputs
 
