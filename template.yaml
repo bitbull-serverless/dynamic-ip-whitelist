@@ -64,7 +64,7 @@ Resources:
         CertificateArn: !Ref ApiCertificateArn
         EndpointConfiguration: REGIONAL
         Route53: !If 
-          - IsHostedZoneIdProvided, 
+          - IsHostedZoneIdProvided
           - HostedZoneId: !Ref HostedZoneId
           - !Ref AWS::NoValue
 
