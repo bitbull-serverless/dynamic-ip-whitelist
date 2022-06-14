@@ -37,13 +37,9 @@ Parameters:
   HostedZoneId:
     Type: String
     Description: "The Route53 hosted zone ID used for the domain"
-    Default: ""
   AcmCertificateArn:
     Type: String
     Description: "The certificate arn for the domain name provided"
-
-Conditions:
-  IsHostedZoneIdProvided: !Not [!Equals [!Ref HostedZoneId, ""]]
 
 Globals:
   Function:
@@ -63,10 +59,8 @@ Resources:
         DomainName: !Ref ApiDomainName
         CertificateArn: !Ref ApiCertificateArn
         EndpointConfiguration: REGIONAL
-        Route53: !If 
-          - IsHostedZoneIdProvided
-          - HostedZoneId: !Ref HostedZoneId
-          - !Ref AWS::NoValue
+        Route53:
+          HostedZoneId: !Ref HostedZoneId
 
   TokenParameter:
     Type: AWS::SSM::Parameter
