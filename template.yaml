@@ -44,7 +44,7 @@ Parameters:
 Globals:
   Function:
     Timeout: 6
-    Runtime: nodejs14.x
+    Runtime: nodejs16.x
     CodeUri: ./src
     Tags:
       ServiceName: Dynamic IP Whitelist
