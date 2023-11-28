@@ -57,15 +57,11 @@ Resources:
 
 This application need some required parameters when you deploy it:
 
+- **StageName**: The name that identify the API stage.
+
 - **Token**: The token used to validate the request, requires at least 20 characters in length.
 
 - **SecurityGroupId**: The Security Group where add rules to.
-
-- **DomainName**: The domain name of website.
-
-- **AcmCertificateArn**: The certificate arn for the domain name provided.
-
-- **HostedZoneId**: The Route53 hosted zone ID used for the domain.
 
 Optional parameters:
 

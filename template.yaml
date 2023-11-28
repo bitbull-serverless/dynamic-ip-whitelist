@@ -31,15 +31,10 @@ Parameters:
     Type: String
     Description: The schedule expression to describe when flush ingresses.
     Default: 'cron(0 0 * * ? *)'
-  DomainName:
+  StageName:
     Type: String
-    Description: "The domain name of website"
-  HostedZoneId:
-    Type: String
-    Description: "The Route53 hosted zone ID used for the domain"
-  AcmCertificateArn:
-    Type: String
-    Description: "The certificate arn for the domain name provided"
+    Description: The API stage name.
+    Default: whitelist
 
 Globals:
   Function:
@@ -54,13 +49,7 @@ Resources:
   ApiGatewayApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: api
-      Domain:
-        DomainName: !Ref DomainName
-        CertificateArn: !Ref AcmCertificateArn
-        EndpointConfiguration: REGIONAL
-        Route53:
-          HostedZoneId: !Ref HostedZoneId
+      StageName: !Ref StageName
 
   TokenParameter:
     Type: AWS::SSM::Parameter
@@ -132,4 +121,4 @@ Outputs:
 
   Endpoint:
     Description: "Dynamic whitelist endpoint"
-    Value: !Sub "https://${DomainName}/<place here the provided token>/"
+    Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/"
