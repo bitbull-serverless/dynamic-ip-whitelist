@@ -1,12 +1,12 @@
-const SecurityGroup = require('./lib/securityGroup.mjs').default
-const Parameter = require('./lib/parameter.mjs').default
+import SecurityGroup from './lib/securityGroup.mjs'
+import Parameter from './lib/parameter.mjs'
 
 /**
  * Lambda handler
  * 
  * @param {object} event
  */
-exports.handler = async (event) => {
+export async function handler(event) {
 	console.log('event', JSON.stringify(event))
 
 	// Get token from SSM parameter
@@ -50,7 +50,7 @@ exports.handler = async (event) => {
 	try {
 		await securityGroup.authorizeIP(sourceIp)
 	} catch (err) {
-		if (err.code == 'InvalidPermission.Duplicate') {
+		if (err.name == 'InvalidPermission.Duplicate') {
 			console.error('found duplicate IP whitelist request')
 
 			// Return invalid request

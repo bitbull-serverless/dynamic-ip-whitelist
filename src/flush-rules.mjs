@@ -1,13 +1,13 @@
-const SecurityGroup = require('./lib/securityGroup')
+import SecurityGroup from './lib/securityGroup.mjs'
 
 /**
  * Lambda handler
  * 
  * @param {object} event
  */
-exports.handler = async (event) => {
+export async function handler(event) {
 	console.log('event', JSON.stringify(event))
-	
+
 	// Setup security group, port and protocol
 	const securityGroup = new SecurityGroup(process.env.SECURITY_GROUP_ID)
 	securityGroup.setIngressConfig(process.env.INGRESS_PORT, process.env.INGRESS_PROTOCOL, process.env.RULE_DESCRIPTION)

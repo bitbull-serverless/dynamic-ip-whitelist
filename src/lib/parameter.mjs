@@ -14,7 +14,7 @@ class Parameter {
 	/**
    * Get Parameter value
    * 
-   * @returns {string}
+   * @returns {Promise<string>}
    */
 	async getValue() {
 		const res = await ssm.send(new GetParameterCommand({
