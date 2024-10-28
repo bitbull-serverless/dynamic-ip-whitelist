@@ -1,8 +1,5 @@
-const EC2 = require('aws-sdk/clients/ec2')
-const ec2 = new EC2({
-	logger: console,
-	apiVersion: '2016-11-15'
-})
+import { EC2Client, AuthorizeSecurityGroupIngressCommand, RevokeSecurityGroupIngressCommand, DescribeSecurityGroupsCommand } from "@aws-sdk/client-ec2";
+const ec2 = new EC2Client()
 
 class SecurityGroup {
 	/**
@@ -34,14 +31,14 @@ class SecurityGroup {
 			this.toPort = port
 		}
 	}
-  
+
 	/**
    * Authorize IP as ingress
    * 
    * @param {string} sourceIp
    */
 	async authorizeIP(sourceIp) {
-		await ec2.authorizeSecurityGroupIngress({
+		const input = {
 			GroupId: this.securityGroupId,
 			IpPermissions: [{
 				IpProtocol: this.protocol,
@@ -52,8 +49,12 @@ class SecurityGroup {
 					Description: this.ruleDescription
 				}]
 			}]
-		}).promise()
+		}
+
+		await ec2.send(new AuthorizeSecurityGroupIngressCommand(input))
 	}
+
+
 
 	/**
    * Revoke IPs ingress
@@ -61,7 +62,7 @@ class SecurityGroup {
    * @param {string[]} sourceIps
    */
 	async revokeIPs(sourceIps) {
-		await ec2.revokeSecurityGroupIngress({
+		const input = {
 			GroupId: this.securityGroupId,
 			IpPermissions: [{
 				IpProtocol: this.protocol,
@@ -71,18 +72,21 @@ class SecurityGroup {
 					CidrIp: sourceIp
 				}))
 			}]
-		}).promise()
+		}
+
+		await ec2.send(new RevokeSecurityGroupIngressCommand(input))
 	}
 
 	/**
    * List current IP rules
    */
 	async listCurrentIpRules() {
-		const res = await ec2.describeSecurityGroups({
+		const input = {
 			GroupIds: [this.securityGroupId]
-		}).promise()
+		}
+		const res = await ec2.send(new DescribeSecurityGroupsCommand(input))
 
-		if(res.SecurityGroups.length == 0){
+		if (res.SecurityGroups.length == 0) {
 			console.error(`security group ${this.securityGroupId} not found`)
 			return []
 		}
@@ -104,7 +108,7 @@ class SecurityGroup {
 
 			ipPermission.IpRanges.forEach((ipRange) => {
 				// Check if rule has the right description
-				if(ipRange.Description === this.ruleDescription){
+				if (ipRange.Description === this.ruleDescription) {
 					ipPermissionsFiltered.push(ipRange.CidrIp)
 					console.log(`found IP range ${ipRange.CidrIp}`)
 				} else {
@@ -118,4 +122,4 @@ class SecurityGroup {
 
 }
 
-module.exports = SecurityGroup
+export default SecurityGroup

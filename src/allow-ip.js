@@ -1,4 +1,4 @@
-const SecurityGroup = require('./lib/securityGroup')
+const SecurityGroup = require('./lib/securityGroup.mjs').default
 const Parameter = require('./lib/parameter.mjs').default
 
 /**
