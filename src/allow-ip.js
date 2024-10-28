@@ -1,5 +1,5 @@
 const SecurityGroup = require('./lib/securityGroup')
-const Parameter = require('./lib/parameter')
+const Parameter = require('./lib/parameter.mjs').default
 
 /**
  * Lambda handler
@@ -14,7 +14,7 @@ exports.handler = async (event) => {
 	const token = await tokenParameter.getValue()
 
 	// Check token
-	if(!event.pathParameters.token || event.pathParameters.token.toString().trim() !== token){
+	if (!event.pathParameters.token || event.pathParameters.token.toString().trim() !== token) {
 		console.error('Token supplied is not valid or missing')
 		// Return unauthorized response
 		return {
@@ -30,7 +30,7 @@ exports.handler = async (event) => {
 	// Get current source ip
 	const sourceIp = event.requestContext.identity.sourceIp
 	if (!sourceIp) {
-		console.error('cannot find sourceIp from request context: '+JSON.stringify(event.requestContext))
+		console.error('cannot find sourceIp from request context: ' + JSON.stringify(event.requestContext))
 		// Return unauthorized response
 		return {
 			statusCode: 500,
