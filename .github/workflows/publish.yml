@@ -26,6 +26,7 @@ jobs:
         with:
           name: sam
           path: .aws-sam
+          include-hidden-files: true
 
       - id: version
         run: echo ::set-output name=tag::${GITHUB_REF/refs\/tags\//}
