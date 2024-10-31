@@ -1,12 +1,12 @@
-const SecurityGroup = require('./lib/securityGroup')
-const Parameter = require('./lib/parameter')
+import SecurityGroup from './lib/securityGroup.mjs'
+import Parameter from './lib/parameter.mjs'
 
 /**
  * Lambda handler
  * 
  * @param {object} event
  */
-exports.handler = async (event) => {
+export async function handler(event) {
 	console.log('event', JSON.stringify(event))
 
 	// Get token from SSM parameter
@@ -14,7 +14,7 @@ exports.handler = async (event) => {
 	const token = await tokenParameter.getValue()
 
 	// Check token
-	if(!event.pathParameters.token || event.pathParameters.token.toString().trim() !== token){
+	if (!event.pathParameters.token || event.pathParameters.token.toString().trim() !== token) {
 		console.error('Token supplied is not valid or missing')
 		// Return unauthorized response
 		return {
@@ -30,7 +30,7 @@ exports.handler = async (event) => {
 	// Get current source ip
 	const sourceIp = event.requestContext.identity.sourceIp
 	if (!sourceIp) {
-		console.error('cannot find sourceIp from request context: '+JSON.stringify(event.requestContext))
+		console.error('cannot find sourceIp from request context: ' + JSON.stringify(event.requestContext))
 		// Return unauthorized response
 		return {
 			statusCode: 500,
@@ -50,7 +50,7 @@ exports.handler = async (event) => {
 	try {
 		await securityGroup.authorizeIP(sourceIp)
 	} catch (err) {
-		if (err.code == 'InvalidPermission.Duplicate') {
+		if (err.name == 'InvalidPermission.Duplicate') {
 			console.error('found duplicate IP whitelist request')
 
 			// Return invalid request

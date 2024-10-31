@@ -1,5 +1,5 @@
-const SSM = require('aws-sdk/clients/ssm')
-const ssm = new SSM()
+import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm"
+const ssm = new SSMClient()
 
 class Parameter {
 	/**
@@ -10,16 +10,16 @@ class Parameter {
 	constructor(parameterName) {
 		this.parameterName = parameterName
 	}
-  
+
 	/**
    * Get Parameter value
    * 
-   * @returns {string}
+   * @returns {Promise<string>}
    */
 	async getValue() {
-		const res = await ssm.getParameter({
+		const res = await ssm.send(new GetParameterCommand({
 			Name: this.parameterName
-		}).promise()
+		}))
 
 		const parameter = res.Parameter
 		return parameter.Value
@@ -27,4 +27,4 @@ class Parameter {
 
 }
 
-module.exports = Parameter
+export default Parameter

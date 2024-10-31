@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 
 Description: Allow temporary whitelist to Security group for a specific IP
@@ -6,8 +6,8 @@ Description: Allow temporary whitelist to Security group for a specific IP
 Parameters:
   Token:
     Type: String
-    MinLength : 20
-    AllowedPattern : '[a-zA-Z0-9\-]+'
+    MinLength: 20
+    AllowedPattern: '[a-zA-Z0-9\-]+'
     NoEcho: true
     Description: The token used to authenticate the request.
   SecurityGroupId:
@@ -16,12 +16,12 @@ Parameters:
   IngressPort:
     Type: String
     Description: The Security group port to allow to connect to. You can specify a single port number or a range (for example, 7000-8000).
-    Default: '22'
+    Default: "22"
   IngressProtocol:
     Type: String
     Description: The Security group protocol to allow to connect to.
     Default: TCP
-    AllowedValues: ['TCP', 'UDP', 'ICMP']
+    AllowedValues: ["TCP", "UDP", "ICMP"]
   RuleDescription:
     Type: String
     MaxLength: 255
@@ -30,7 +30,7 @@ Parameters:
   FlushScheduleExpression:
     Type: String
     Description: The schedule expression to describe when flush ingresses.
-    Default: 'cron(0 0 * * ? *)'
+    Default: "cron(0 0 * * ? *)"
   StageName:
     Type: String
     Description: The API stage name.
@@ -39,7 +39,7 @@ Parameters:
 Globals:
   Function:
     Timeout: 6
-    Runtime: nodejs16.x
+    Runtime: nodejs20.x
     CodeUri: ./src
     Tags:
       ServiceName: Dynamic IP Whitelist
@@ -56,7 +56,7 @@ Resources:
     Properties:
       Type: String
       Value: !Ref Token
-  
+
   AllowIpFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -73,11 +73,11 @@ Resources:
         - SSMParameterReadPolicy:
             ParameterName: !Ref TokenParameter
         - Statement:
-          - Sid: AllowIP
-            Effect: Allow
-            Action:
-              - ec2:AuthorizeSecurityGroupIngress
-            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/${SecurityGroupId}"
+            - Sid: AllowIP
+              Effect: Allow
+              Action:
+                - ec2:AuthorizeSecurityGroupIngress
+              Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/${SecurityGroupId}"
       Events:
         ApiEvent:
           Type: Api
@@ -100,14 +100,14 @@ Resources:
           RULE_DESCRIPTION: !Ref RuleDescription
       Policies:
         - Statement:
-          - Effect: Allow
-            Action:
-              - ec2:DescribeSecurityGroups
-            Resource: "*"
-          - Effect: Allow
-            Action:
-              - ec2:RevokeSecurityGroupIngress
-            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/${SecurityGroupId}"
+            - Effect: Allow
+              Action:
+                - ec2:DescribeSecurityGroups
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - ec2:RevokeSecurityGroupIngress
+              Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/${SecurityGroupId}"
       Events:
         FlushIngressScheduledEvent:
           Type: Schedule
